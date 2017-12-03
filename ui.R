@@ -20,9 +20,9 @@ shinyUI(fluidPage(
     
     sidebarPanel(
       
-       dateRangeInput("Date", "Date:"),
+       dateRangeInput("Date", "Date:", start = "2017-11-29", end = "2017-11-29"),
        
-       textInput("Name", "Stock Name:", value = "ROKU")
+       textInput("Name", "Stock Name:", value = "TSLA")
        
     ),
     
