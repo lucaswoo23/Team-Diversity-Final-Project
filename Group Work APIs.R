@@ -15,11 +15,11 @@ quandl_api = "LyjxCY3XxHfkd29FAFJy"
 # Add the key to the Quandl keychain
 Quandl.api_key(quandl_api)
 
-google_stocks <- function(sym, start_date) {
+google_stocks <- function(sym, start_date, end_date) {
     require(devtools)
     require(Quandl)
     # create a vector with all lines
-    tryCatch(Quandl(c(
+    google_out = tryCatch(Quandl(c(
       paste0("WIKI/", sym, ".8"),  #  Adj. Open
       paste0("WIKI/", sym, ".9"),  # Adj. High
       paste0("WIKI/", sym, ".10"), # Adj. Low
@@ -28,13 +28,29 @@ google_stocks <- function(sym, start_date) {
       start_date = start_date,
       type = "zoo"
     ))
+    start_date <- as.Date(start_date)
+    end_date <-as.Date(end_date)
+    google_out <- as.data.frame(google_out) %>% 
+    tibble::rownames_to_column()
+    names(google_out) <- c("Date", "Open", "High", "Low", "Close", "Volume")
+    #a <- google_out$Date
+    #a <- as.Date(a)
+    google_out <- filter(google_out, start_date <= as.Date(Date, format = "%Y-%m-%d") & end_date >= as.Date(Date, format = "%Y-%m-%d"))
+    return(google_out)
 }
 
-aapl_data <- google_stocks("AAPL", "2015-01-01")
+# aapl_data <- google_stocks("AAPL", "2016-01-01")
 
 # Fetches the data for an individual stock
-TSLA_data <- google_stocks('TSLA', "2015-01-01")
-ggplot(ROKU_data, aes(ROKU_data$High, ROKU_data$Close)) + geom_point()
+TSLA_data <- google_stocks("TSLA", "2017-01-01", "2017-01-20")
+TSLA_data$Date <- as.Date(TSLA_data$Date, format = "%Y-%m-%d")
+View(TSLA_data)
+
+ggplot(TSLA_data, aes(Date, Close, group = 1)) +
+  geom_point(aes(color = Volume)) +
+  geom_line() 
+
+
 
 SP500_ETF_data <- google_stocks("SPY")    # S&P500 ETF Fund
 
