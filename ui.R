@@ -16,19 +16,37 @@ shinyUI(fluidPage(
   titlePanel("Stock Analysis"),
   
   # Sidebar with a slider input for number of bins 
-  sidebarLayout(
-    
-    sidebarPanel(
-      
-       dateRangeInput("Date", "Date:", start = "2017-11-29", end = "2017-11-29"),
-       
-       textInput("Name", "Stock Name:", value = "TSLA")
-       
+  
+  tabsetPanel( 
+    tabPanel(
+      "Individual Stock",
+      sidebarLayout(
+         sidebarPanel(
+            dateRangeInput("Date", "Date:", start = "2017-11-29", end = Sys.Date()),
+            textInput("Name", "Stock Name:", value = "TSLA")
+         ),
+         mainPanel(
+           plotOutput("distPlot")
+         )
+      )
     ),
     
-    # Show a plot of the generated distribution
-    mainPanel(
-       plotOutput("distPlot")
+    tabPanel(
+      "Overview",
+       sidebarLayout(
+          sidebarPanel(
+            radioButtons("radio", label = h3("Select Timeline"),
+                         choices = list("5 Day" = 1, "1 Month" = 2, "6 Month" = 3,
+                                        "1 Year" = 4, "5 Year" = 5, "Max" = 6),
+                         selected = 3)
+          ),
+          mainPanel(
+            plotOutput("sp500"),
+            plotOutput("dow_jones"),
+            plotOutput("nasdaq")
+          )
+      )
     )
   )
+
 ))

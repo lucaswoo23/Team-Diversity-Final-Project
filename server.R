@@ -1,12 +1,3 @@
-#
-# This is the server logic of a Shiny web application. You can run the 
-# application by clicking 'Run App' above.
-#
-# Find out more about building applications with Shiny here:
-# 
-#    http://shiny.rstudio.com/
-#
-
 library(shiny)
 library("dplyr")
 library("data.table")
@@ -15,6 +6,7 @@ library("TTR")
 library("quantmod")
 library("Quandl")
 #library("Rblpapi") 
+
 # Get your API key from quandl.com
 quandl_api = "LyjxCY3XxHfkd29FAFJy"
 
@@ -23,6 +15,7 @@ Quandl.api_key(quandl_api)
 
 # Define server logic required to draw a histogram
 shinyServer(function(input, output) {
+  
   google_stocks <- function(sym, start_date, end_date) {
     require(devtools)
     require(Quandl)
@@ -47,6 +40,39 @@ shinyServer(function(input, output) {
     return(google_out)
   }
   
+  sp500 <- new.env()
+  sp500.data <- function(start.date) {
+    df <- getSymbols("^GSPC", src = "yahoo", from=start.date, to=Sys.Date())
+    SPC <- data.frame(GSPC$GSPC.Close, GSPC$GSPC.Volume)
+    SPC <- as.data.frame(SPC) %>% 
+           tibble::rownames_to_column()
+    colnames(SPC) <- c("Date", "Close", "Volume")
+    return(SPC)
+  }
+  
+   # Fetches the Dow Jones Data from a certain year to a certain year
+  dowjones<- new.env()
+  dow.jones.data <- function(start.date) {
+     df <- getSymbols("^DJI", env = dowjones, src = "yahoo", from=start.date, to=Sys.Date())
+     djia <- dowjones$DJI
+     DJIA <- data.frame(djia$DJI.Close, djia$DJI.Volume)
+     DJIA <- as.data.frame(DJIA) %>%
+             tibble::rownames_to_column()
+     colnames(DJIA) <- c("Date", "Close", "Volume")
+     return(DJIA)
+  }
+  
+  # Fetches the NASDAQ Data from a certain year to a certain year
+  nasdaq <- new.env()
+  nasdaq.data <- function(start.date) { 
+     df <- getSymbols("^NDX", env = nasdaq, src = "yahoo", from=start.date, to=Sys.Date())
+     ndx <- nasdaq$NDX
+     NDX <- data.frame(ndx$NDX.Close, ndx$NDX.Volume)
+     NDX <- as.data.frame(NDX) %>%
+            tibble::rownames_to_column()
+     colnames(NDX) <- c("Date", "Close", "Volume")
+     return(NDX)
+  }
   
   #listings <- stockSymbols()
   #get.stock.ticker <- function(stock.name) {
@@ -54,20 +80,83 @@ shinyServer(function(input, output) {
   #}
   
   output$distPlot <- renderPlot({
-    date_vector <- input$Date 
-    start_date <- date_vector[1]
-    end_date <- date_vector[2]
-    chosen_stock_info <- google_stocks(input$Name, start_date, end_date)
-    chosen_stock_info$Date <- as.Date(chosen_stock_info$Date, format = "%Y-%m-%d")
-    
-    ggplot(chosen_stock_info, aes(x = Date, y = Close, group = 1)) +
-      geom_point(aes(color = Volume)) +
-      geom_line() 
-    
-
-    
-
-    
+     date_vector <- input$Date 
+     start_date <- date_vector[1]
+     end_date <- date_vector[2]
+     chosen_stock_info <- google_stocks(input$Name, start_date, end_date)
+     chosen_stock_info$Date <- as.Date(chosen_stock_info$Date, format = "%Y-%m-%d")
+     
+     ggplot(chosen_stock_info, aes(x = Date, y = Close, group = 1)) +
+           geom_point(aes(color = Volume)) +
+           geom_line() +
+           ggtitle(paste0(input$Name, " Information"))
+  
+  })
+  
+  output$sp500 <- renderPlot({
+     date <- 0
+     if(input$radio == 1) {
+        date <- 7
+     }else if(input$radio == 2) {
+        date <- 30
+     }else if(input$radio == 3) {
+        date <- 188
+     }else if(input$radio == 4) {
+        date <- 365
+     }else if(input$radio == 5) {
+        date <- 365 * 5
+     }else {
+        date <- 365 * 100
+     }
+     sp.data <- sp500.data(Sys.Date() - date)
+     ggplot(sp.data, aes(x = Date, y = Close, group = 1)) +
+           geom_point(aes(color = Volume)) +
+           geom_line() +
+           ggtitle("S&P 500 Data")
+  })
+  
+  output$dow_jones <- renderPlot({
+     date <- 0
+     if(input$radio == 1) {
+        date <- 7
+     }else if(input$radio == 2) {
+        date <- 30
+     }else if(input$radio == 3) {
+        date <- 188
+     }else if(input$radio == 4) {
+        date <- 365
+     }else if(input$radio == 5) {
+        date <- 365 * 5
+     }else {
+        date <- 365 * 100
+     }
+     dj.data <- dow.jones.data(Sys.Date() - date)
+     ggplot(dj.data, aes(x = Date, y = Close, group = 1)) +
+           geom_point(aes(color = Volume)) +
+           geom_line() +
+           ggtitle("Dow Jones Industrial Average Data")
+  })
+  
+  output$nasdaq <- renderPlot({
+     date <- 0
+     if(input$radio == 1) {
+        date <- 7
+     }else if(input$radio == 2) {
+        date <- 30
+     }else if(input$radio == 3) {
+        date <- 188
+     }else if(input$radio == 4) {
+        date <- 365
+     }else if(input$radio == 5) {
+        date <- 365 * 5
+     }else {
+        date <- 365 * 100
+     }
+     nasdaq.data <- nasdaq.data(Sys.Date() - date)
+     ggplot(nasdaq.data, aes(x = Date, y = Close, group = 1)) +
+            geom_point(aes(color = Volume)) +
+            geom_line() +
+            ggtitle("NASDAQ-100 Market Index Data")
   })
   
 })
