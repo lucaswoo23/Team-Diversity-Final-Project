@@ -5,6 +5,10 @@ library("TTR")
 library("quantmod")
 library("Rblpapi")  
 
+library("httr")
+library("jsonlite")
+library("dplyr")
+library("data.table")
 
 # Quandl package must be installed
 library(Quandl)
@@ -15,42 +19,27 @@ quandl_api = "LyjxCY3XxHfkd29FAFJy"
 # Add the key to the Quandl keychain
 Quandl.api_key(quandl_api)
 
-google_stocks <- function(sym, start_date, end_date) {
-    require(devtools)
-    require(Quandl)
-    # create a vector with all lines
-    google_out = tryCatch(Quandl(c(
-      paste0("WIKI/", sym, ".8"),  #  Adj. Open
-      paste0("WIKI/", sym, ".9"),  # Adj. High
-      paste0("WIKI/", sym, ".10"), # Adj. Low
-      paste0("WIKI/", sym, ".11"), # Adj. Close
-      paste0("WIKI/", sym, ".12")), # Adj. Volume
-      start_date = start_date,
-      type = "zoo"
-    ))
-    start_date <- as.Date(start_date)
-    end_date <-as.Date(end_date)
-    google_out <- as.data.frame(google_out) %>% 
-    tibble::rownames_to_column()
-    names(google_out) <- c("Date", "Open", "High", "Low", "Close", "Volume")
-    #a <- google_out$Date
-    #a <- as.Date(a)
-    google_out <- filter(google_out, start_date <= as.Date(Date, format = "%Y-%m-%d") & end_date >= as.Date(Date, format = "%Y-%m-%d"))
-    return(google_out)
+
+google_stocks <- function(sym, start, end) {
+  base.url <- paste0('https://www.quandl.com/api/v3/datasets/WIKI/', sym, '/data.json')
+  query.params <- list(start_date = start, end_date = end, api_key = quandl_api)
+  response <- GET(base.url, query = query.params)
+  body <- content(response, "text")
+  result <- fromJSON(body)
+  cols <- c(1, 9, 10, 11, 12, 13)
+  data <- result$dataset_data$data[ , cols]
+  colnames(data) <- c("Date", "Open", "High", "Low", "Close", "Volume")
+  return(data)
 }
 
-# aapl_data <- google_stocks("AAPL", "2016-01-01")
+test_data <- google_stocks("AAPL", "2016-01-01", "2017-01-01")
+
+
+aapl_data <- google_stocks("AAPL", "2015-01-01")
 
 # Fetches the data for an individual stock
-TSLA_data <- google_stocks("TSLA", "2017-01-01", "2017-01-20")
-TSLA_data$Date <- as.Date(TSLA_data$Date, format = "%Y-%m-%d")
-View(TSLA_data)
-
-ggplot(TSLA_data, aes(Date, Close, group = 1)) +
-  geom_point(aes(color = Volume)) +
-  geom_line() 
-
-
+TSLA_data <- google_stocks('TSLA', "2015-01-01")
+ggplot(ROKU_data, aes(ROKU_data$High, ROKU_data$Close)) + geom_point()
 
 SP500_ETF_data <- google_stocks("SPY")    # S&P500 ETF Fund
 
