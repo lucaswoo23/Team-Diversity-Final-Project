@@ -22,11 +22,21 @@ shinyUI(fluidPage(
       "Individual Stock",
       sidebarLayout(
          sidebarPanel(
-            dateRangeInput("Date", "Date:", start = "2017-11-29", end = Sys.Date()),
-            textInput("Name", "Stock Name:", value = "TSLA")
+           
+            textInput("Name", label = h3("Stock Ticker:"), value = "TSLA"),
+            
+            dateRangeInput("Date", label = h3("Date:"), start = "2017-11-29", end = Sys.Date()),
+            
+            hr(),
+            
+            textInput("text", label = h5("Enter Name of Company to Receive Ticker Information"),
+                      value = "Enter Company Name")
+            
          ),
          mainPanel(
-           plotOutput("distPlot")
+           plotOutput("distPlot"),
+           hr(),
+           dataTableOutput("asdf")
          )
       )
     ),

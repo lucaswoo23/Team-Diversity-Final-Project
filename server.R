@@ -16,6 +16,7 @@ Quandl.api_key(quandl_api)
 # Define server logic required to draw a histogram
 shinyServer(function(input, output) {
   
+  # Fetches the Individual Stock's Information Given the Ticker Symbol, the Starting Date, and the Ending Date
   google_stocks <- function(sym, start_date, end_date) {
     require(devtools)
     require(Quandl)
@@ -40,6 +41,35 @@ shinyServer(function(input, output) {
     return(google_out)
   }
   
+  # Plots the Individual Stock Information
+  output$distPlot <- renderPlot({
+    date_vector <- input$Date 
+    start_date <- date_vector[1]
+    end_date <- date_vector[2]
+    chosen_stock_info <- google_stocks(input$Name, start_date, end_date)
+    chosen_stock_info$Date <- as.Date(chosen_stock_info$Date, format = "%Y-%m-%d")
+    
+    ggplot(chosen_stock_info, aes(x = Date, y = Close, group = 1)) +
+      geom_point(aes(color = Volume)) +
+      geom_line() +
+      ggtitle(paste0(input$Name,  " Information"))
+  })
+  
+  # Fetches the Stock Information (Name, Ticker, Industry, etc.)
+  listings <- stockSymbols()
+  get.stock.ticker <- function(stock.name) {
+    stock.ticker <- listings %>% filter(grepl(stock.name, listings$Name)) %>% select(Symbol, Name)
+    return(stock.ticker)
+  }
+
+  # Outputs the text of the stock ticker
+  output$asdf <- renderDataTable({
+    
+    stock.ticker <- get.stock.ticker(input$text)
+    
+  })
+  
+  # Fetches the S&P 500 Data from a certain date to current date
   sp500 <- new.env()
   sp500.data <- function(start.date) {
     df <- getSymbols("^GSPC", src = "yahoo", from=start.date, to=Sys.Date())
@@ -50,7 +80,7 @@ shinyServer(function(input, output) {
     return(SPC)
   }
   
-   # Fetches the Dow Jones Data from a certain year to a certain year
+   # Fetches the Dow Jones Data from a certain date to current date
   dowjones<- new.env()
   dow.jones.data <- function(start.date) {
      df <- getSymbols("^DJI", env = dowjones, src = "yahoo", from=start.date, to=Sys.Date())
@@ -62,7 +92,7 @@ shinyServer(function(input, output) {
      return(DJIA)
   }
   
-  # Fetches the NASDAQ Data from a certain year to a certain year
+  # Fetches the NASDAQ Data from a certain date to current date
   nasdaq <- new.env()
   nasdaq.data <- function(start.date) { 
      df <- getSymbols("^NDX", env = nasdaq, src = "yahoo", from=start.date, to=Sys.Date())
@@ -74,25 +104,7 @@ shinyServer(function(input, output) {
      return(NDX)
   }
   
-  #listings <- stockSymbols()
-  #get.stock.ticker <- function(stock.name) {
-  #  stock.ticker <- listings %>% filter(grepl(stock.name, listings$Name)) %>% select(Symbol)
-  #}
-  
-  output$distPlot <- renderPlot({
-     date_vector <- input$Date 
-     start_date <- date_vector[1]
-     end_date <- date_vector[2]
-     chosen_stock_info <- google_stocks(input$Name, start_date, end_date)
-     chosen_stock_info$Date <- as.Date(chosen_stock_info$Date, format = "%Y-%m-%d")
-     
-     ggplot(chosen_stock_info, aes(x = Date, y = Close, group = 1)) +
-           geom_point(aes(color = Volume)) +
-           geom_line() +
-           ggtitle(paste0(input$Name, " Information"))
-  
-  })
-  
+  # Plots the S&P 500 Information
   output$sp500 <- renderPlot({
      date <- 0
      if(input$radio == 1) {
@@ -115,6 +127,7 @@ shinyServer(function(input, output) {
            ggtitle("S&P 500 Data")
   })
   
+  # Plots the Dow Jones Information 
   output$dow_jones <- renderPlot({
      date <- 0
      if(input$radio == 1) {
@@ -137,6 +150,7 @@ shinyServer(function(input, output) {
            ggtitle("Dow Jones Industrial Average Data")
   })
   
+  # Plots the NASDAQ Information
   output$nasdaq <- renderPlot({
      date <- 0
      if(input$radio == 1) {
