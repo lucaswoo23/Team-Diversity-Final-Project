@@ -5,7 +5,10 @@ library("ggplot2")
 library("TTR")
 library("quantmod")
 library("Quandl")
+library("plyr") 
 #library("Rblpapi") 
+
+
 
 # Get your API key from quandl.com
 quandl_api = "LyjxCY3XxHfkd29FAFJy"
@@ -68,6 +71,35 @@ shinyServer(function(input, output) {
     stock.ticker <- get.stock.ticker(input$text)
     
   })
+  
+  # Plots the chosen sectors
+  
+  filtered_sector <- filter(listings, Sector == "Finance")  
+                      
+  top_five <- head(arrange(filtered_sector,desc(MarketCap)), n = 5)
+  
+  empty_dataframe <- data.frame(matrix(ncol = 3, nrow = 0))
+  values <- c("Date", "Close", "Volume")
+  colnames(empty_dataframe) <- values
+  
+  
+  for (i in nrow(top_five)) {
+      symbol <- top_five[i,1]
+      new_df <- google_stocks(symbol, input$singledate, Sys.Date())
+      selected_df <- select(new_df, Date, Close, Volume) 
+      full_join(selected_df, empty_dataframe)
+  }
+  
+  
+  #top_five_sector <- filtered_sector[order(filtered_sector$MarketCap),]
+  #group_by(Name) %>%
+    s#ummarize(MarketCap=max(MarketCap))
+  
+  
+  
+  
+  
+  
   
   # Fetches the S&P 500 Data from a certain date to current date
   sp500 <- new.env()
