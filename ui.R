@@ -8,6 +8,7 @@
 #
 
 library(shiny)
+library(dplyr)
 
 # Define UI for application that draws a histogram
 shinyUI(fluidPage(
@@ -36,7 +37,10 @@ shinyUI(fluidPage(
          mainPanel(
            plotOutput("distPlot"),
            hr(),
-           dataTableOutput("asdf")
+           textOutput("min"),
+           textOutput("max"),
+           hr(),
+           dataTableOutput("stock.df")
          )
       )
     ),
@@ -56,6 +60,22 @@ shinyUI(fluidPage(
             plotOutput("nasdaq")
           )
       )
+    ),
+    
+    tabPanel(
+       "Comparison",
+       sidebarLayout(
+          sidebarPanel(
+             selectInput("sector.select", label = h3("Select Sector"),
+                         choices = listings %>% group_by(Sector) %>% summarize),
+             
+             dateInput("single.date", label = h3("Please input the starting date:"), 
+                       value = "2017-01-01")
+          ),
+          mainPanel(
+            plotOutput("comparison.plot") 
+          )
+       )
     )
   )
 
