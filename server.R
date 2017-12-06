@@ -6,6 +6,7 @@ library("TTR")
 library("quantmod")
 library("Quandl")
 
+
 # Get your API key from quandl.com
 quandl_api = "LyjxCY3XxHfkd29FAFJy"
 
@@ -40,16 +41,17 @@ shinyServer(function(input, output) {
   }
   
   # Grabs the start date and end date that the user wishes to use
-  get.information <- function() {
-    date_vector <- input$Date 
+  get.information <- function(Name, Date) {
+    date_vector <- Date 
     start_date <- date_vector[1]
     end_date <- date_vector[2]
-    chosen_stock_info <- google_stocks(input$Name, start_date, end_date)
+    chosen_stock_info <- google_stocks(Name, start_date, end_date)
+    return(chosen_stock_info)
   }
   
   # Outputs the minimum stock price and date of an individual stock
   output$min <- renderText({
-     chosen_stock_info <- get.information()
+     chosen_stock_info <- get.information(input$Name, input$Date)
      min <- filter(chosen_stock_info, Close == min(Close))
      min.close <- min$Close
      min.date <- min$Date
@@ -58,7 +60,7 @@ shinyServer(function(input, output) {
   
   # Outputs the maxium stock price and date of an individual stock
   output$max <- renderText({
-     chosen_stock_info <- get.information()
+     chosen_stock_info <- get.information(input$Name, input$Date)
      max <- filter(chosen_stock_info, Close == max(Close))
      max.close <- max$Close
      max.date <- max$Date
@@ -67,7 +69,7 @@ shinyServer(function(input, output) {
   
   # Plots the Individual Stock Information
   output$distPlot <- renderPlot({
-    chosen_stock_info <- get.information()
+    chosen_stock_info <- get.information(input$Name, input$Date)
     chosen_stock_info$Date <- as.Date(chosen_stock_info$Date, format = "%Y-%m-%d")
     ggplot(chosen_stock_info, aes(x = Date, y = Close, group = 1)) +
       geom_point(aes(color = Volume)) +
@@ -174,26 +176,22 @@ shinyServer(function(input, output) {
   })
   
   output$comparison.plot <- renderPlot({
+      
+      stock_1 <- get.information(input$Name_1, input$Date.guy)
+      stock_1$Date <- as.Date(stock_1$Date, format = "%Y-%m-%d")
+      
+      stock_2 <- get.information(input$Name_2, input$Date.guy)
+      stock_2$Date <- as.Date(stock_2$Date, format = "%Y-%m-%d")
+      
+      combined_data <- data.frame(rbind(stock_1, stock_2))
+      
+     ggplot() +
+        geom_point(data = stock_1, aes(x = Date, y = Close, col = "Red")) + 
+        geom_line(data = stock_1, aes(x = Date, y = Close, col = "Red")) +
+        geom_point(data = stock_2, aes(x = Date, y = Close, col = "Blue")) +
+        geom_line(data = stock_2, aes(x = Date, y = Close, col = "Blue")) +
+        scale_color_hue(labels = c(input$Name_2, input$Name_1))
      
-     filtered_sector <- filter(listings, Sector == 'Basic Industries')
-     top_five <- head(arrange(filtered_sector,desc(MarketCap)), n = 5)
-     empty_dataframe <- data.frame(matrix(ncol = 4, nrow = 0))
-     values <- c("Date", "Close", "Volume", "Symbol")
-     colnames(empty_dataframe) <- values
-     empty_dataframe$Date <- as.Date(empty_dataframe$Date)
-     
-     for (i in nrow(top_five)) {
-        symbol <- top_five[i,1]
-        new_df <- google_stocks(symbol, "2017-09-01", Sys.Date())
-        selected_df <- select(new_df, Date, Close, Volume) 
-        selected_df$Date <- as.Date(selected_df$Date)
-        empty_dataframe <- full_join(empty_dataframe, selected_df)
-        empty_dataframe$Symbol <- symbol
-     }
-     
-     ggplot(data=empty_dataframe, aes(x=Date, y=Close, group = Symbol, colour = Volume)) +
-        geom_line() +
-        geom_point()
   })
   
 })

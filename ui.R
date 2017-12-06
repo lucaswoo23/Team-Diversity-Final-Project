@@ -9,16 +9,24 @@
 
 library(shiny)
 library(dplyr)
+library(shinythemes)
+library(rmarkdown)
 
 # Define UI for application that draws a histogram
-shinyUI(fluidPage(
-  
+shinyUI(fluidPage(theme = shinytheme("superhero"),
+                  
   # Application title
   titlePanel("Stock Analysis"),
   
   # Sidebar with a slider input for number of bins 
-  
+  fluidRow(
+    
   tabsetPanel( 
+    tabPanel(
+      "Background", 
+      includeMarkdown("background[1904].md")
+    ),
+    
     tabPanel(
       "Individual Stock",
       sidebarLayout(
@@ -66,11 +74,17 @@ shinyUI(fluidPage(
        "Comparison",
        sidebarLayout(
           sidebarPanel(
-             selectInput("sector.select", label = h3("Select Sector"),
-                         choices = listings %>% group_by(Sector) %>% summarize),
+            textInput("Name_1", label = h3("Stock Ticker 1 (Shown in Blue):"), value = "TSLA"),
+            
+            textInput("Name_2", label = h3("Stock Ticker 2 (Shown in Red):"), value = "AAPL"),
+            
+            dateRangeInput("Date.guy", label = h3("Date:"), start = "2017-11-29", end = Sys.Date())
+            
+             #selectInput("sector.select", label = h3("Select Sector"),
+             #           choices = listings %>% group_by(Sector) %>% summarize),
              
-             dateInput("single.date", label = h3("Please input the starting date:"), 
-                       value = "2017-01-01")
+             #dateInput("single.date", label = h3("Please input the starting date:"), 
+             #           value = "2017-01-01")
           ),
           mainPanel(
             plotOutput("comparison.plot") 
@@ -79,4 +93,5 @@ shinyUI(fluidPage(
     )
   )
 
+  )
 ))
