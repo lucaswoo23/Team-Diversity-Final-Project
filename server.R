@@ -5,6 +5,7 @@ library("ggplot2")
 library("TTR")
 library("quantmod")
 library("Quandl")
+library("DT")
 
 
 # Get your API key from quandl.com
@@ -85,9 +86,11 @@ shinyServer(function(input, output) {
   }
   
   # Outputs the text of the stock ticker
-  output$stock.df <- renderDataTable({
-    stock.ticker <- get.stock.ticker(input$text)
+   output$stock.df <- renderDataTable({
+   stock.ticker <- get.stock.ticker(input$text)
   })
+  
+ # output$stock.df <- (get.stock.ticker(input$text))
   
   # Fetches the S&P 500 Data from a certain date to current date
   sp500 <- new.env()

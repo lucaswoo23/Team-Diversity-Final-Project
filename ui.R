@@ -34,7 +34,7 @@ shinyUI(fluidPage(theme = shinytheme("superhero"),
            
             textInput("Name", label = h3("Stock Ticker:"), value = "TSLA"),
             
-            dateRangeInput("Date", label = h3("Date:"), start = "2017-11-29", end = Sys.Date()),
+            dateRangeInput("Date", label = h3("Date (API discontinued on March 28, 2018 so data only funcitonal until then):"), start = "2017-11-29", end = "2018-03-28"),
             
             hr(),
             
@@ -78,7 +78,7 @@ shinyUI(fluidPage(theme = shinytheme("superhero"),
             
             textInput("Name_2", label = h3("Stock Ticker 2 (Shown in Red):"), value = "AAPL"),
             
-            dateRangeInput("Date.guy", label = h3("Date:"), start = "2017-11-29", end = Sys.Date())
+            dateRangeInput("Date.guy", label = h3("Date:"), start = "2017-11-29", end = "2018-03-28")
             
              #selectInput("sector.select", label = h3("Select Sector"),
              #           choices = listings %>% group_by(Sector) %>% summarize),
