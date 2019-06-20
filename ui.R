@@ -13,7 +13,7 @@ library(shinythemes)
 library(rmarkdown)
 
 # Define UI for application that draws a histogram
-shinyUI(fluidPage(theme = shinytheme("superhero"),
+shinyUI(fluidPage(theme = shinytheme("cyborg"),
                   
   # Application title
   titlePanel("Stock Analysis"),
@@ -34,12 +34,13 @@ shinyUI(fluidPage(theme = shinytheme("superhero"),
            
             textInput("Name", label = h3("Stock Ticker:"), value = "TSLA"),
             
-            dateRangeInput("Date", label = h3("Date (API discontinued on March 28, 2018 so data only funcitonal until then):"), start = "2017-11-29", end = "2018-03-28"),
+            dateRangeInput("Date", label = h3("Date:"), start = "2017-11-29", end = "2018-03-28"),
+            tags$p("API discontinued on March 28, 2018 so data is only functional through then. In process of finding new API."),
             
             hr(),
             
             textInput("text", label = h5("Enter Name of Company to Receive Ticker Information"),
-                      value = "Enter Company Name")
+                      value = "Tesla")
             
          ),
          mainPanel(
@@ -48,7 +49,7 @@ shinyUI(fluidPage(theme = shinytheme("superhero"),
            textOutput("min"),
            textOutput("max"),
            hr(),
-           dataTableOutput("stock.df")
+           dataTableOutput("stock.df") 
          )
       )
     ),

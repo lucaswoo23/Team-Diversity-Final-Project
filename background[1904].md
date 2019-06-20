@@ -1,4 +1,4 @@
-# Team Diversity
+# Background
 
 **Team Members: ** Ryan Peart, Lucas Woo, Sam Yoshikawa, Victoria Pressman
 
@@ -6,4 +6,4 @@
 
 **Data info: ** Our stock market data is retrieved from Google Finance that is offered through a simple API on the Quandl platform.
 
-The link to our shiny application can be found here: https://rgpeart.shinyapps.io/Team-Diversity-Final-Project/
+The link to our shiny application can be found here: https://samyosh.shinyapps.io/Team-Diversity-Final-Project/

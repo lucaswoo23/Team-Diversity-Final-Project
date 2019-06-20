@@ -5,8 +5,8 @@ account: samyosh
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 989320
-bundleId: 2165430
+bundleId: 2167680
 url: https://samyosh.shinyapps.io/Team-Diversity-Final-Project/
-when: 1560993404.55569
+when: 1561065420.75083
 asMultiple: FALSE
 asStatic: FALSE
