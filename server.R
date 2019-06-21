@@ -5,48 +5,78 @@ library("ggplot2")
 library("TTR")
 library("quantmod")
 library("Quandl")
-library(DT)
+library("DT")
+library("alphavantager")
 
 
 # Get your API key from quandl.com
-quandl_api = "LyjxCY3XxHfkd29FAFJy"
+# quandl_api = "LyjxCY3XxHfkd29FAFJy"
 
 # Add the key to the Quandl keychain
-Quandl.api_key(quandl_api)
+# Quandl.api_key(quandl_api)
+
+# API key from Alpha Vantage
+av_api_key = "MUIABSMCIKG2WU0E"
+
+# Sets the Alpha Vantage API key
+av_api_key(av_api_key)
+
 
 # Define server logic required to draw a histogram
 shinyServer(function(input, output) {
   
   # Fetches the Individual Stock's Information Given the Ticker Symbol, the Starting Date, and the Ending Date
-  google_stocks <- function(sym, start_date, end_date) {
-    require(devtools)
-    require(Quandl)
-    # create a vector with all lines
-    google_out = tryCatch(Quandl(c(
-      paste0("WIKI/", sym, ".8"),  #  Adj. Open
-      paste0("WIKI/", sym, ".9"),  # Adj. High
-      paste0("WIKI/", sym, ".10"), # Adj. Low
-      paste0("WIKI/", sym, ".11"), # Adj. Close
-      paste0("WIKI/", sym, ".12")), # Adj. Volume
-      start_date = start_date,
-      type = "zoo"
-    ))
+  
+  # google_stocks <- function(sym, start_date, end_date) {
+  #   require(devtools)
+  #   require(Quandl)
+  #   # create a vector with all lines
+  #   google_out = tryCatch(Quandl(c(
+  #     paste0("WIKI/", sym, ".8"),  #  Adj. Open
+  #     paste0("WIKI/", sym, ".9"),  # Adj. High
+  #     paste0("WIKI/", sym, ".10"), # Adj. Low
+  #     paste0("WIKI/", sym, ".11"), # Adj. Close
+  #     paste0("WIKI/", sym, ".12")), # Adj. Volume
+  #     start_date = start_date,
+  #     type = "zoo"
+  #   ))
+  #   start_date <- as.Date(start_date)
+  #   end_date <- as.Date(end_date)
+  #   google_out <- as.data.frame(google_out) %>% 
+  #                 tibble::rownames_to_column()
+  #   names(google_out) <- c("Date", "Open", "High", "Low", "Close", "Volume")
+  # 
+  #   google_out <- filter(google_out, start_date <= as.Date(Date, format = "%Y-%m-%d") & end_date >= as.Date(Date, format = "%Y-%m-%d"))
+  #   return(google_out)
+  # }
+
+  av_stocks <- function(sym, start_date, end_date) {
+    stock_data <- av_get(symbol = sym, av_fun = "TIME_SERIES_DAILY", outputsize = "full")
+    
     start_date <- as.Date(start_date)
     end_date <- as.Date(end_date)
-    google_out <- as.data.frame(google_out) %>% 
+    
+    stock_out <- as.data.frame(stock_data) %>%
                   tibble::rownames_to_column()
-    names(google_out) <- c("Date", "Open", "High", "Low", "Close", "Volume")
+    
+    vars <- c("timestamp", "open", "high", "low", "close", "volume")
+    stock_out <- stock_out[vars]
 
-    google_out <- filter(google_out, start_date <= as.Date(Date, format = "%Y-%m-%d") & end_date >= as.Date(Date, format = "%Y-%m-%d"))
-    return(google_out)
+    names(stock_out) <- c("Date", "Open", "High", "Low", "Close", "Volume")
+
+    stock_out <- filter(stock_out, start_date <= as.Date(Date, format = "%Y-%m-%d") & end_date >= as.Date(Date, format = "%Y-%m-%d"))
+   
+    return(stock_out)
   }
+  
+  
   
   # Grabs the start date and end date that the user wishes to use
   get.information <- function(Name, Date) {
     date_vector <- Date 
     start_date <- date_vector[1]
     end_date <- date_vector[2]
-    chosen_stock_info <- google_stocks(Name, start_date, end_date)
+    chosen_stock_info <- av_stocks(Name, start_date, end_date)
     return(chosen_stock_info)
   }
   
@@ -82,7 +112,6 @@ shinyServer(function(input, output) {
   listings <- stockSymbols()
   get.stock.ticker <- function(stock.name) {
     stock.ticker <- listings %>% filter(grepl(stock.name, listings$Name)) %>% select(Symbol, Name)
-    print(stock.ticker)
     return(stock.ticker)
   }
   

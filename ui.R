@@ -34,7 +34,7 @@ shinyUI(fluidPage(theme = shinytheme("cyborg"),
            
             textInput("Name", label = h3("Stock Ticker:"), value = "TSLA"),
             
-            dateRangeInput("Date", label = h3("Date:"), start = "2017-11-29", end = "2018-03-28"),
+            dateRangeInput("Date", label = h3("Date:"), start = "2017-01-01", end = Sys.Date()),
             tags$p("API discontinued on March 28, 2018 so data is only functional through then. In process of finding new API."),
             
             hr(),
